@@ -3,6 +3,11 @@
 ### About
 **Augmented reality (AR) in laparoscopic liver surgery** needs key landmark detection in intraoperative 2D laparoscopic images and its registration with the preoperative 3D model created from CT/MRI data. 
 
+**Responsible persons:**
+[Yamid Espinel](yamid.espinel@gmail.com)
+[Yueming Jin](ymjin5341@gmail.com)
+[Sharib Ali](ali.sharib2002@gmail.com)
+
 ### Tasks for assessment
 
 - Task 1: finding reliable landmarks from laparoscopy video images
@@ -15,3 +20,7 @@ TODO:
 - Anatomical landmark localization 
 - 2D-3D keypoint matching distance, root mean square error
 
+### Acknowledgement
+
+
+### Citations
