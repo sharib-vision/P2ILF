@@ -21,8 +21,8 @@ print (sys.version_info)
 def get_args():
     import argparse
     parser = argparse.ArgumentParser(description="RFA: semantic segmentation", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("--groundtruthMesh", type=str, default="meshGT.obj", help="supply .obj GT mesh")
-    parser.add_argument("--deformedMesh", type=str, default="originalMesh_views12345678_ct1_wrp1_arap0_alterscheme3.obj", help="supply deformed mesh (    originalMesh_views12345678_ct1_wrp0_arap0_alterscheme3.obj; originalMesh_views12345678_ct1_wrp1_arap0_alterscheme3)")
+    parser.add_argument("--groundtruthMesh", type=str, default="originalMesh/meshGT.obj", help="supply .obj GT mesh")
+    parser.add_argument("--deformedMesh", type=str, default="registeredMesh/originalMesh_views12345678_ct1_wrp1_arap0_alterscheme3.obj", help="supply deformed mesh (    originalMesh_views12345678_ct1_wrp0_arap0_alterscheme3.obj; originalMesh_views12345678_ct1_wrp1_arap0_alterscheme3)")
     args = parser.parse_args()
     return args
 
@@ -30,7 +30,7 @@ def get_args():
 
 if __name__ == "__main__":
     
-    registration_path = './registration_example/registrations/seq1/view0/'
+    registration_path = './'
     
     args = get_args()
     
