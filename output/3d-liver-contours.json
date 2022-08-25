@@ -1,0 +1,1 @@
+{"numOfContours": 3, "contour": [{"contourType": "Ridge", "modelPoints": {"vertices": [1227, 1544, 1626, 1635]}}, {"contourType": "Ridge", "modelPoints": {"vertices": [2012, 1942, 2013, 2132, 2151, 2164, 2254, 2438, 2514]}}, {"contourType": "Ligament", "modelPoints": {"vertices": [2709, 2744, 2774, 2866, 2885, 2922]}}]}
