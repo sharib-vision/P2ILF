@@ -198,7 +198,7 @@ if __name__ == "__main__":
     # import meshio
 
     import json
-    from misc_eval import EndoCV_misc
+    from misc import EndoCV_misc
     
     args = get_args()
     
