@@ -106,6 +106,121 @@ def symDist2(P,G, P_dt=None, G_dt=None, threshold_dt=50, reduction=False, norm='
         return torch.sum(distSym).item()
     return distSym
 
+def distanceMatching(A,B,dmax):
+    # check if A is not empty
+    if A.sum().item() == 0:
+        return 0.0, 0.0, 0.0, False
+    #compute dt
+    B_dt = torch.from_numpy(computeTDT(B.numpy(),dmax,norm=False))
+
+    dAB = distContour2Dt(A, B_dt)
+    N_tot = A.sum().item()
+    mask_dmax = dAB >= dmax # n non_match
+    mask_match_and_zero = dAB < dmax # n match + zero
+
+    n_non_match = float(mask_dmax.sum().item())
+    n_match = N_tot - n_non_match
+    distance_tot = dAB[mask_match_and_zero].sum().item()
+
+    return distance_tot, n_non_match, n_match, True
+
+def symetricDistanceMatching(A,B,dmax):
+    """
+    if output = 'all':
+        return (D_AB+D_BA) /2, distance_AB, distance_BA, miss_A, miss_B
+    else
+        return D, miss_A, miss_B
+    """
+    # get non normed results
+    D_AB, miss_A, match_A, A_not_empty = distanceMatching(A,B,dmax)
+
+    D_BA, miss_B, match_B, B_not_empty = distanceMatching(B,A,dmax)
+
+    if (not A_not_empty) and (not B_not_empty): # if both False
+        return 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+
+    # compute d_AB and d_BA norm:
+    if D_AB > 0:
+        D_AB_norm = D_AB / (1.0 * match_A)
+    else:
+        D_AB_norm = 0.0 # = d_AB
+    if D_BA:
+        D_BA_norm = D_BA / (1.0* match_B)
+    else:
+        D_BA_norm = 0. # = d_BA
+
+    D = (D_AB + D_BA)/(1.0 * (A_not_empty + B_not_empty)) # denom can't be = 0 cause A+B empty is dealt before
+
+    return D, D_AB_norm, D_BA_norm, miss_A, miss_B, match_A, match_B
+
+def computeSymetricDistanceMatching(input, target, thresh_dt=None):
+    if thresh_dt==None:
+        thresh_dt = 50
+
+    n_class = input.shape[0]
+    # distance combined normed
+    dist_sym = torch.zeros((n_class-1,1), dtype=torch.float64)
+    # distance pred to gt normed by n_pred_match
+    dist_pred = torch.zeros((n_class-1,1), dtype=torch.float64)
+    # distance gt to pred normed by n_gt_match
+    dist_gt = torch.zeros((n_class-1,1), dtype=torch.float64)
+    miss_pred = torch.zeros((n_class-1,1), dtype=torch.float64)
+    miss_gt = torch.zeros((n_class-1,1), dtype=torch.float64)
+    match_pred = torch.zeros((n_class-1,1), dtype=torch.float64)
+    match_gt = torch.zeros((n_class-1,1), dtype=torch.float64)
+
+    for i in range(1,n_class): # skip class0
+        out = symetricDistanceMatching(input[i, :], target[i,:],dmax=thresh_dt)
+        dist_sym[i-1,0] = out[0]
+        dist_pred[i-1,0] = out[1]
+        dist_gt[i-1,0] = out[2]
+        miss_pred[i-1,0] = out[3]
+        miss_gt[i-1,0] = out[4]
+        match_pred[i-1,0] = out[5]
+        match_gt[i-1,0] = out[6]
+
+def computeScoreDataset(sym_dist_matching, n_miss_gt, n_match_gt, n_outliers, n_pixels, dmax):
+    score_match = sym_dist_matching
+    n_tot_gt =n_miss_gt + n_match_gt
+    score_outliers = dmax * n_outliers / (n_pixels - 2*dmax*n_tot_gt)
+    score_gt_miss = dmax * n_miss_gt / n_tot_gt
+    score = score_match + score_outliers + score_gt_miss
+    return score
+
+def computeScoreFrancois(contours_one_hot, target_one_hot, w_image, h_image, n_class, dmax):
+    symetric_distances_matching = torch.zeros((1, n_class-1,1), dtype=torch.float64)
+    distance_matching_pred = torch.zeros((1, n_class-1,1), dtype=torch.float64)
+    distance_matching_gt = torch.zeros((1, n_class-1,1), dtype=torch.float64)
+    n_miss_gt_all = torch.zeros((1, n_class-1,1), dtype=torch.float64)
+    n_miss_pred_all = torch.zeros((1, n_class-1,1), dtype=torch.float64)
+    n_match_pred_all= torch.zeros((1, n_class-1,1), dtype=torch.float64)
+    n_match_gt_all= torch.zeros((1, n_class-1,1), dtype=torch.float64)
+    
+    #  compute symetric distance matching
+    sym_dist_match, d_pred, d_gt, miss_pred, miss_gt, match_pred, match_gt = computeSymetricDistanceMatching(contours_one_hot.squeeze(), target_one_hot, dmax)
+    
+    distance_matching_pred[0] += d_pred * match_pred
+    distance_matching_gt[0] += d_gt * match_gt
+    n_miss_gt_all[0] += miss_gt
+    n_miss_pred_all[0] += miss_pred
+    n_match_pred_all[0] += match_pred
+    n_match_gt_all[0] += match_gt
+    
+    N_images = 1
+    n_pixels = h_image * w_image
+    
+    # compute symetric chamfer distance normed by 2 x N_gt_match
+    symetric_distances_matching = (distance_matching_pred + distance_matching_gt) / (2.0 * n_match_gt_all)
+    distance_matching_pred /= n_match_pred_all # norm by all pred inliers pixels
+    distance_matching_gt /= n_match_gt_all # norm by all gt matched pixels
+    n_miss_gt_all /= N_images # norm by total images
+    n_miss_pred_all /= N_images # norm by total images
+    n_match_pred_all /= N_images # norm by total images
+    n_match_gt_all /= N_images # norm by total images
+    full_score = computeScoreDataset(symetric_distances_matching, n_miss_gt_all, n_match_gt_all, n_miss_pred_all, n_pixels, dmax)
+    
+    return full_score
+
 
 def thinPrediction(contour_input, n_class, area_threshold_hole=5, min_size_elements=5):
     """
