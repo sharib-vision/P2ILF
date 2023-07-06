@@ -64,7 +64,7 @@ if __name__ == "__main__":
     import numpy as np
     import cv2
     import torch
-    from metric_functions import computeScoreFrancois, convertGT_toOneHotEncoding, thinPrediction, precision, sensitivity, computeClassificationMetrics, symDist2
+    from metric_functions import computeScoreFrancois, computeScoreFrancoisSimplified, convertGT_toOneHotEncoding, thinPrediction, precision, sensitivity, computeClassificationMetrics, symDist2
     from misc import EndoCV_misc
     args = get_args()
     nclass = 4
@@ -119,9 +119,12 @@ if __name__ == "__main__":
     
     # Compute full score according to François et al (2022):
     thresh_dt = 10
-    metricsdist_Ligament = computeScoreFrancois(T_one_hot_eval[:,:,2], T_one_hot_GT[:,:,2], int(data_params['width']), int(data_params['height']), 2, thresh_dt)
-    metricsdist_SL = computeScoreFrancois(T_one_hot_eval[:,:,3], T_one_hot_GT[:,:,3], int(data_params['width']), int(data_params['height']), 2, thresh_dt)
-    metricsdist_Ridge = computeScoreFrancois(T_one_hot_eval[:,:,1], T_one_hot_GT[:,:,1], int(data_params['width']), int(data_params['height']), 2, thresh_dt)
+    # metricsdist_Ligament = computeScoreFrancois(T_one_hot_eval[:,:,2], T_one_hot_GT[:,:,2], int(data_params['width']), int(data_params['height']), 2, thresh_dt)
+    # metricsdist_SL = computeScoreFrancois(T_one_hot_eval[:,:,3], T_one_hot_GT[:,:,3], int(data_params['width']), int(data_params['height']), 2, thresh_dt)
+    # metricsdist_Ridge = computeScoreFrancois(T_one_hot_eval[:,:,1], T_one_hot_GT[:,:,1], int(data_params['width']), int(data_params['height']), 2, thresh_dt)
+    metricsdist_Ligament = computeScoreFrancoisSimplified(T_one_hot_eval[:,:,2], T_one_hot_GT[:,:,2], int(data_params['width']), int(data_params['height']), 2, thresh_dt)
+    metricsdist_SL = computeScoreFrancoisSimplified(T_one_hot_eval[:,:,3], T_one_hot_GT[:,:,3], int(data_params['width']), int(data_params['height']), 2, thresh_dt)
+    metricsdist_Ridge = computeScoreFrancoisSimplified(T_one_hot_eval[:,:,1], T_one_hot_GT[:,:,1], int(data_params['width']), int(data_params['height']), 2, thresh_dt)
     
     my_dictionary = {"P2ILF_2D_contours":{"Classification":{"Ridge": [metrics_Ridge[0], metrics_Ridge[1]],
                 "Ligament":  [metrics_Ligament[0], metrics_Ligament[1]],

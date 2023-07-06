@@ -221,6 +221,24 @@ def computeScoreFrancois(contours_one_hot, target_one_hot, w_image, h_image, n_c
     
     return full_score
 
+def computeScoreFrancoisSimplified(contours_one_hot, target_one_hot, w_image, h_image, dmax):
+    
+    A = contours_one_hot.squeeze()
+    B = target_one_hot.squeeze()
+ 
+    D_AB, miss_A, match_A, A_not_empty = distanceMatching(A,B,dmax)
+
+    D_BA, miss_B, match_B, B_not_empty = distanceMatching(B,A,dmax)
+
+    n_pixel_image = A.shape[0] * A.shape[1]
+    n_tot_gt = miss_B+match_B
+    D_match = (D_AB + D_BA) / (2.0 * n_tot_gt)
+    D_miss_gt = dmax * miss_B / (1.0*n_tot_gt)
+    D_outliers = dmax * miss_A / (n_pixel_image - (2*dmax*n_tot_gt))
+    score = D_match + D_miss_gt + D_outliers
+
+    return score
+
 
 def thinPrediction(contour_input, n_class, area_threshold_hole=5, min_size_elements=5):
     """
