@@ -14,8 +14,6 @@
 - Task 2: matching it to the 3D liver model from volumetric data (CT/MR).
 
 ### Metrics for evaluation
-
-TODO:
 - Anatomical landmark segmentation
 - Anatomical landmark localization 
 - 2D-3D keypoint matching distance, root mean square error
