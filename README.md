@@ -20,7 +20,6 @@ TODO:
 - Anatomical landmark localization 
 - 2D-3D keypoint matching distance, root mean square error
 
-### Acknowledgement
 
-
-### Citations
+### Citation
+Sharib Ali, Yamid Espinel, Yueming Jin, Peng Liu, Bianca Güttner, Xukun Zhang, Lihua Zhang, Tom Dowrick, Matthew J. Clarkson, Shiting Xiao, Yifan Wu, Yijun Yang, Lei Zhu, Dai Sun, Lan Li, Micha Pfeiffer, Shahid Farid, Lena Maier-Hein, Emmanuel Buc, Adrien Bartoli. An objective comparison of methods for augmented reality in laparoscopic liver resection by preoperative-to-intraoperative image fusion from the MICCAI2022 challenge, Medical Image Analysis, Volume 99, 2025, 103371, ISSN 1361-8415, https://doi.org/10.1016/j.media.2024.103371.
